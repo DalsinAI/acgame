@@ -1,0 +1,29 @@
+==id $Id: acgame_lib.sfd 1.0 (6.11.2026) $
+* "acgame.library" (ACGame), AmiCradle Team
+==base _ACGameBase
+==basetype struct Library *
+==libname acgame.library
+==bias 30
+==public
+==include <exec/types.h>
+==include <libraries/acgame.h>
+LONG ACG_C2P8Ref(const UBYTE *chunky, ULONG chunkyPitch, UBYTE **planes, ULONG planePitch, ULONG width, ULONG height)(a0,d0,a1,d1,d2,d3)
+LONG ACG_C2P8Fast(const UBYTE *chunky, ULONG chunkyPitch, UBYTE **planes, ULONG planePitch, ULONG width, ULONG height)(a0,d0,a1,d1,d2,d3)
+LONG ACG_P2C8Ref(UBYTE *chunky, ULONG chunkyPitch, const UBYTE **planes, ULONG planePitch, ULONG width, ULONG height)(a0,d0,a1,d1,d2,d3)
+LONG ACG_HAM8EncodeRow(const acgame_rgb8 *src, ULONG width, const acgame_rgb8 *basePalette, UBYTE *codes, acgame_rgb8 *decoded)(a0,d0,a1,a2,a3)
+LONG ACG_HAM8DecodeRow(const UBYTE *codes, ULONG width, const acgame_rgb8 *basePalette, acgame_rgb8 *decoded)(a0,d0,a1,a2)
+LONG ACG_PlatformInit(const acgame_video_config *config)(a0)
+VOID ACG_PlatformShutdown()()
+acgame_indexed_surface *ACG_BeginIndexedFrame()()
+LONG ACG_PresentIndexed(const acgame_indexed_surface *frame)(a0)
+LONG ACG_SetPalette(const acgame_rgb8 *palette)(a0)
+LONG ACG_DisplayIsPlanar()()
+LONG ACG_GetInfo(acgame_platform_info *info)(a0)
+LONG ACG_PresentHAM8(const UBYTE *hamCodes, ULONG pitch, const acgame_rgb8 *basePalette)(a0,d0,a1)
+VOID ACG_Poll(acgame_input_state *state)(a0)
+const UBYTE *ACG_RawKeys()()
+LONG ACG_Pointer(LONG *x, LONG *y)(a0,a1)
+LONG ACG_ShowPointer(LONG show)(d0)
+ULONG ACG_TicksMS()()
+LONG ACG_AudioS16Stereo(const WORD *samples, ULONG frames, ULONG sampleRate)(a0,d0,d1)
+==end
