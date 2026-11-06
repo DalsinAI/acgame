@@ -17,8 +17,12 @@ the cores and the GPU where the system offers it.
 - On a planar 8-plane screen (native AGA) `acgame_c2p8_fast` converts the frame
   into the screen's planes: an 8x8 bit transpose in 32-bit registers, about 30
   instructions for eight pixels where the reference converter takes 64 tests.
-  GFOpenGfx has no planar path for `WriteChunkyPixels` yet, so this stays
-  ACGame's own work on every machine.
+  With gfopengpu.library 0.28 or later (GFOpenGfx in) the frame goes through
+  `WriteChunkyPixels` instead: GFOpenGfx's core does the one c2p for every
+  game and the browser, 32 pixels at a time a long to each plane, and its
+  provider chain can hand it to faster hardware. ACGame's own C2P is the
+  fallback without it, and `ENV:ACGame/C2P` set to `OWN` keeps it anyway, to
+  compare the two.
 - On any other 8-bit screen (GFOpenRTG, or another RTG system) the frame goes
   through graphics.library's `WriteChunkyPixels` (V40, OS 3.1 and later).
   GFOpenGfx (gfopengpu.library 0.8 and later) owns that call, so on AmiCradle the

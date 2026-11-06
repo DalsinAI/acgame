@@ -1,7 +1,7 @@
 /* Copyright (c) 2026 AmiCradle Team. ACGame, MIT licence (see LICENSE at the repository root).
  * SPDX-License-Identifier: MIT
  *
- * acgame.library 1.0: ACGame's game layer (c2p, HAM8, the AGA and RTG
+ * acgame.library 1.1: ACGame's game layer (c2p, HAM8, the AGA and RTG
  * screens, keyboard, mouse and pads) as a shared library for AmigaOS 3.x.
  * The calls are acgame.h's and platform.h's, in library/acgame_lib.sfd's
  * order; the backend is src/platform_aros_aga.c, built with ACGAME_LIBRARY.
@@ -45,8 +45,8 @@ struct Device *TimerBase;
 int start(void) { return -1; }      /* run as a program: nothing (stays first in the file) */
 
 static const char lib_name[] = ACGAME_LIB_NAME;
-static const char lib_id[] = "acgame.library 1.0 (6.11.2026) ACGame, AmiCradle Team\r\n";
-static const char lib_ver[] __attribute__((used)) = "$VER: acgame.library 1.0 (6.11.2026)";   /* for Version on the file */
+static const char lib_id[] = "acgame.library 1.1 (6.11.2026) ACGame, AmiCradle Team\r\n";
+static const char lib_ver[] __attribute__((used)) = "$VER: acgame.library 1.1 (6.11.2026)";   /* for Version on the file */
 
 struct ACGBase {
     struct Library lib;

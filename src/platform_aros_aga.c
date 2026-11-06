@@ -192,6 +192,7 @@ typedef struct {
     unsigned top;
     int planar;
     int opengfx;
+    int shared_c2p;     /* planar frames through WriteChunkyPixels (gfopengpu.library 0.28) */
     int palette_valid;
     int quit_requested;
     /* Planar screens: three Chip RAM buffers (two when Chip RAM is short)
@@ -642,8 +643,8 @@ static void close_display(void) {
 
 /* Whether GFOpenGfx has graphics.library's drawing calls (gfopengpu.library 0.8
  * and later, patches in): then WriteChunkyPixels on an RTG screen is done by
- * the cores, not the 68k. A planar screen still takes ACGame's own C2P, as
- * GFOpenGfx has no planar path for WriteChunkyPixels yet. */
+ * the cores, not the 68k. From 0.28 GFOpenGfx has the one planar c2p too
+ * (shared_c2p_active). */
 static int opengfx_active(void) {
 #if ACGAME_OPENGPU
     if (!OpenGPUBase) {
@@ -654,6 +655,25 @@ static int opengfx_active(void) {
     }
     return (OGFX_Status() & (OGFX_STATUS_PATCHED | OGFX_STATUS_ENABLED)) ==
            (OGFX_STATUS_PATCHED | OGFX_STATUS_ENABLED);
+#else
+    return 0;
+#endif
+}
+
+/* Whether planar frames go through WriteChunkyPixels: GFOpenGfx in, from
+ * gfopengpu.library 0.28, which does the c2p (32 pixels a long to each
+ * plane, Chip RAM after WaitBlit) for every game and the browser alike.
+ * ENV:ACGame/C2P=OWN keeps ACGame's own C2P, to compare the two. */
+static int shared_c2p_active(void) {
+#if ACGAME_OPENGPU
+    char value[8];
+    if (!g_acgame_amiga.opengfx || OpenGPUBase->lib_Revision < OPENGPU_OGFX_C2P_REVISION) {
+        return 0;
+    }
+    if (env_value("ACGame/C2P", value, sizeof(value)) && (value[0] == 'O' || value[0] == 'o')) {
+        return 0;
+    }
+    return 1;
 #else
     return 0;
 #endif
@@ -950,6 +970,14 @@ static int update_palette(const acgame_rgb8 palette[256]) {
 static int c2p_into(struct BitMap *bitmap, const acgame_indexed_surface *frame) {
     uint8_t *planes[8];
     unsigned p;
+    if (g_acgame_amiga.shared_c2p) {
+        struct RastPort rp;
+        InitRastPort(&rp);
+        rp.BitMap = bitmap;
+        WriteChunkyPixels(&rp, 0, 0, frame->width - 1, frame->height - 1,
+                          frame->pixels, (LONG)frame->pitch);
+        return 0;
+    }
     for (p = 0; p < 8; ++p) {
         planes[p] = (uint8_t *)bitmap->Planes[p];
     }
@@ -1148,6 +1176,7 @@ opened:
     memset(g_acgame_amiga.pixels, 0, (size_t)config->width * config->height);
 
     g_acgame_amiga.opengfx = opengfx_active();
+    g_acgame_amiga.shared_c2p = shared_c2p_active();
     LowLevelBase = OpenLibrary((CONST_STRPTR)"lowlevel.library", 40);
 #if ACGAME_OPENINPUT
     oi_open(&g_acgame_amiga.oi);
