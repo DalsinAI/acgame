@@ -46,6 +46,7 @@ int start(void) { return -1; }      /* run as a program: nothing (stays first in
 
 static const char lib_name[] = ACGAME_LIB_NAME;
 static const char lib_id[] = "acgame.library 1.0 (6.11.2026) ACGame, AmiCradle Team\r\n";
+static const char lib_ver[] __attribute__((used)) = "$VER: acgame.library 1.0 (6.11.2026)";   /* for Version on the file */
 
 struct ACGBase {
     struct Library lib;

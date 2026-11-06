@@ -8,6 +8,7 @@
 #                    libacgame.a (Makefile.amigaos), each going to the library
 #   tests/ACGameLibSmoke, ACGameLibTwice   the AGA/RTG smoke test on the
 #                    library, and two openers' states kept apart
+#   tests/ACGameStaticSmoke   the smoke test with the backend linked in
 #   build-amiga.sh            STOVE=dir (default ~/AmiCradle/stoves/os32-gcc16)  OUT=dir
 set -eu
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -60,6 +61,12 @@ echo "$OUT/libacgame.a ($(wc -c < "$OUT/libacgame.a") bytes)"
 # shellcheck disable=SC2086
 "$CC" -noixemul -m68040 $SOFT -O2 -fno-delete-null-pointer-checks $WARN -I"$HERE/include" \
     -o "$OUT/tests/ACGameLibTwice" "$HERE/tests/lib_twice.c"
-for f in ACGameLibSmoke ACGameLibTwice; do
+# the same smoke test with the backend linked in (the static build), to time
+# the library against
+# shellcheck disable=SC2086
+"$CC" -noixemul -m68040 $SOFT -O2 -fno-delete-null-pointer-checks $WARN -I"$HERE/include" \
+    -o "$OUT/tests/ACGameStaticSmoke" "$HERE/examples/aga_smoke.c" \
+    "$HERE/src/c2p_ref.c" "$HERE/src/ham8.c" "$HERE/src/platform_aros_aga.c"
+for f in ACGameLibSmoke ACGameLibTwice ACGameStaticSmoke; do
     echo "$OUT/tests/$f ($(wc -c < "$OUT/tests/$f") bytes)"
 done
