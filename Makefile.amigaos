@@ -1,0 +1,46 @@
+# ACGame for AmigaOS 3.x with the os32-gcc16 stove (GCC 16.2 with the Team's
+# fixes, libnix, the GFOpenGPU SDK 0.7).
+#   make -f Makefile.amigaos STOVE=/path/to/stoves/os32-gcc16/prefix
+#   make -f Makefile.amigaos CPU=-m68040  without the FPU (soft float)
+# The build must stay clean: -Werror, and no warning switched off.
+STOVE   ?= $(HOME)/AmiCradle/stoves/os32-gcc16/prefix
+CC      = $(STOVE)/bin/m68k-amigaos-gcc
+AR      = $(STOVE)/bin/m68k-amigaos-ar
+CPU     = -m68040 -m68881
+CFLAGS  = -noixemul -std=gnu99 -O2 -Wall -Wextra -Werror -fno-delete-null-pointer-checks $(CPU) -Iinclude
+LDFLAGS = -noixemul $(CPU)
+BUILD   = build/amigaos
+
+LIB_OBJS = $(BUILD)/c2p_ref.o $(BUILD)/ham8.o $(BUILD)/platform_aros_aga.o
+PROGRAMS = $(BUILD)/acgame-aga-smoke $(BUILD)/acgame-rtg-smoke $(BUILD)/acgame-smoke $(BUILD)/acgame-joy
+
+all: $(BUILD)/libacgame.a $(PROGRAMS)
+
+$(BUILD)/libacgame.a: $(LIB_OBJS)
+	$(AR) rcs $@ $^
+
+$(BUILD)/%.o: src/%.c include/acgame/*.h | $(BUILD)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(BUILD)/smoke-aga.o: examples/aga_smoke.c include/acgame/*.h | $(BUILD)
+	$(CC) $(CFLAGS) -DACGAME_SMOKE_DISPLAY=ACGAME_DISPLAY_AGA -c -o $@ $<
+$(BUILD)/smoke-rtg.o: examples/aga_smoke.c include/acgame/*.h | $(BUILD)
+	$(CC) $(CFLAGS) -DACGAME_SMOKE_DISPLAY=ACGAME_DISPLAY_RTG -c -o $@ $<
+$(BUILD)/smoke-auto.o: examples/aga_smoke.c include/acgame/*.h | $(BUILD)
+	$(CC) $(CFLAGS) -c -o $@ $<
+$(BUILD)/joy_test.o: examples/joy_test.c include/acgame/*.h | $(BUILD)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(BUILD)/acgame-aga-smoke: $(BUILD)/smoke-aga.o $(BUILD)/libacgame.a
+	$(CC) $(LDFLAGS) -o $@ $^
+$(BUILD)/acgame-rtg-smoke: $(BUILD)/smoke-rtg.o $(BUILD)/libacgame.a
+	$(CC) $(LDFLAGS) -o $@ $^
+$(BUILD)/acgame-smoke: $(BUILD)/smoke-auto.o $(BUILD)/libacgame.a
+	$(CC) $(LDFLAGS) -o $@ $^
+$(BUILD)/acgame-joy: $(BUILD)/joy_test.o $(BUILD)/libacgame.a
+	$(CC) $(LDFLAGS) -o $@ $^
+
+$(BUILD):
+	mkdir -p $@
+
+.PHONY: all
