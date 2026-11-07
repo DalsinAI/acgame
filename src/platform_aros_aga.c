@@ -192,7 +192,7 @@ typedef struct {
     unsigned top;
     int planar;
     int opengfx;
-    int shared_c2p;     /* planar frames through WriteChunkyPixels (gfopengpu.library 0.28) */
+    int shared_c2p;     /* planar frames through WriteChunkyPixels (gfopengpu.library 0.29) */
     int palette_valid;
     int quit_requested;
     /* Planar screens: three Chip RAM buffers (two when Chip RAM is short)
@@ -643,7 +643,7 @@ static void close_display(void) {
 
 /* Whether GFOpenGfx has graphics.library's drawing calls (gfopengpu.library 0.8
  * and later, patches in): then WriteChunkyPixels on an RTG screen is done by
- * the cores, not the 68k. From 0.28 GFOpenGfx has the one planar c2p too
+ * the cores, not the 68k. From 0.29 GFOpenGfx has the one planar c2p too
  * (shared_c2p_active). */
 static int opengfx_active(void) {
 #if ACGAME_OPENGPU
@@ -661,7 +661,7 @@ static int opengfx_active(void) {
 }
 
 /* Whether planar frames go through WriteChunkyPixels: GFOpenGfx in, from
- * gfopengpu.library 0.28, which does the c2p (32 pixels a long to each
+ * gfopengpu.library 0.29, which does the c2p (32 pixels a long to each
  * plane, Chip RAM after WaitBlit) for every game and the browser alike.
  * ENV:ACGame/C2P=OWN keeps ACGame's own C2P, to compare the two. */
 static int shared_c2p_active(void) {

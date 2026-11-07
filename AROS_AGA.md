@@ -17,7 +17,7 @@ the cores and the GPU where the system offers it.
 - On a planar 8-plane screen (native AGA) `acgame_c2p8_fast` converts the frame
   into the screen's planes: an 8x8 bit transpose in 32-bit registers, about 30
   instructions for eight pixels where the reference converter takes 64 tests.
-  With gfopengpu.library 0.28 or later (GFOpenGfx in) the frame goes through
+  With gfopengpu.library 0.29 or later (GFOpenGfx in) the frame goes through
   `WriteChunkyPixels` instead: GFOpenGfx's core does the one c2p for every
   game and the browser, 32 pixels at a time a long to each plane, and its
   provider chain can hand it to faster hardware. ACGame's own C2P is the

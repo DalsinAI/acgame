@@ -59,7 +59,7 @@
 #define OPENGPU_OGFX_REVISION 6          /* gfopengpu.library 0.6: GFOpenGfx inside */
 #define OPENGPU_OGFX_LOOK_REVISION 7     /* gfopengpu.library 0.7: the look hook */
 #define OPENGPU_OGFX_ALL_REVISION 8      /* gfopengpu.library 0.8: every drawing call */
-#define OPENGPU_OGFX_C2P_REVISION 28     /* gfopengpu.library 0.28: the planar c2p for WriteChunkyPixels */
+#define OPENGPU_OGFX_C2P_REVISION 29     /* gfopengpu.library 0.29: the planar c2p for WriteChunkyPixels */
 
 /* OGFX_Version(): (version << 16) | revision of the GFOpenGfx interface.
  * 1.2 is gfopengfx.library 1.1's interface inside gfopengpu.library, with the
