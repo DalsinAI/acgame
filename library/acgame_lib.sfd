@@ -1,4 +1,4 @@
-==id $Id: acgame_lib.sfd 1.0 (6.11.2026) $
+==id $Id: acgame_lib.sfd 1.1 (6.11.2026) $
 * "acgame.library" (ACGame), AmiCradle Team
 ==base _ACGameBase
 ==basetype struct Library *

@@ -15,7 +15,7 @@
 
 #define ACGAME_LIB_NAME     "acgame.library"
 #define ACGAME_LIB_VERSION  1
-#define ACGAME_LIB_REVISION 0
+#define ACGAME_LIB_REVISION 1
 
 #include "../acgame/acgame.h"
 #include "../acgame/platform.h"
