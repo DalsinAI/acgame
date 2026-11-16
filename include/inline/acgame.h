@@ -48,5 +48,7 @@
     LP0(0x84, ULONG, ACG_TicksMS, , ACGAME_BASE_NAME)
 #define ACG_AudioS16Stereo(samples, frames, sampleRate) \
     LP3(0x8a, LONG, ACG_AudioS16Stereo, const WORD *, samples, a0, ULONG, frames, d0, ULONG, sampleRate, d1, , ACGAME_BASE_NAME)
+#define ACG_OpenAllegro(version) \
+    LP1(0x90, struct Library *, ACG_OpenAllegro, LONG, version, d0, , ACGAME_BASE_NAME)
 
 #endif /* _INLINE_ACGAME_H */

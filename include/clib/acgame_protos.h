@@ -24,5 +24,6 @@ LONG ACG_Pointer(LONG * x, LONG * y);
 LONG ACG_ShowPointer(LONG show);
 ULONG ACG_TicksMS(VOID);
 LONG ACG_AudioS16Stereo(const WORD * samples, ULONG frames, ULONG sampleRate);
+struct Library * ACG_OpenAllegro(LONG version);
 
 #endif

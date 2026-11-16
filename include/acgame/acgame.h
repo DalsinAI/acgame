@@ -45,6 +45,10 @@ int acgame_ham8_decode_row(const uint8_t *codes, unsigned width,
                            const acgame_rgb8 base_palette[64],
                            acgame_rgb8 *decoded);
 
+/* The Allegro library for an Allegro version (4 or 5): its file name, as
+ * acgame.library 1.2's ACG_OpenAllegro(version) opens it; NULL for others. */
+const char *acgame_allegro_lib_name(int version);
+
 #ifdef __cplusplus
 }
 #endif
