@@ -1,4 +1,4 @@
-==id $Id: acgame_lib.sfd 1.1 (6.11.2026) $
+==id $Id: acgame_lib.sfd 1.2 (16.11.2026) $
 * "acgame.library" (ACGame), AmiCradle Team
 ==base _ACGameBase
 ==basetype struct Library *
@@ -26,4 +26,6 @@ LONG ACG_Pointer(LONG *x, LONG *y)(a0,a1)
 LONG ACG_ShowPointer(LONG show)(d0)
 ULONG ACG_TicksMS()()
 LONG ACG_AudioS16Stereo(const WORD *samples, ULONG frames, ULONG sampleRate)(a0,d0,d1)
+* 1.2
+struct Library *ACG_OpenAllegro(LONG version)(d0)
 ==end

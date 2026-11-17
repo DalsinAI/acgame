@@ -1,7 +1,7 @@
 /* Copyright (c) 2026 AmiCradle Team. ACGame, MIT licence (see LICENSE at the repository root).
  * SPDX-License-Identifier: MIT
  *
- * acgame.library 1.1: ACGame's game layer (c2p, HAM8, the AGA and RTG
+ * acgame.library 1.2: ACGame's game layer (c2p, HAM8, the AGA and RTG
  * screens, keyboard, mouse and pads) as a shared library for AmigaOS 3.x.
  * The calls are acgame.h's and platform.h's, in library/acgame_lib.sfd's
  * order; the backend is src/platform_aros_aga.c, built with ACGAME_LIBRARY.
@@ -45,8 +45,8 @@ struct Device *TimerBase;
 int start(void) { return -1; }      /* run as a program: nothing (stays first in the file) */
 
 static const char lib_name[] = ACGAME_LIB_NAME;
-static const char lib_id[] = "acgame.library 1.1 (6.11.2026) ACGame, AmiCradle Team\r\n";
-static const char lib_ver[] __attribute__((used)) = "$VER: acgame.library 1.1 (6.11.2026)";   /* for Version on the file */
+static const char lib_id[] = "acgame.library 1.2 (16.11.2026) ACGame, AmiCradle Team\r\n";
+static const char lib_ver[] __attribute__((used)) = "$VER: acgame.library 1.2 (16.11.2026)";   /* for Version on the file */
 
 struct ACGBase {
     struct Library lib;
@@ -88,6 +88,7 @@ static LONG L_ShowPointer(REG(d0, LONG show), REG(a6, struct ACGBase *base));
 static ULONG L_TicksMS(void);
 static LONG L_AudioS16Stereo(REG(a0, const WORD *samples), REG(d0, ULONG frames), REG(d1, ULONG sample_rate),
                              REG(a6, struct ACGBase *base));
+static struct Library *L_OpenAllegro(REG(d0, LONG version));
 
 static const APTR lib_vectors[] = {
     (APTR)lib_open, (APTR)lib_close, (APTR)lib_expunge, (APTR)lib_null,
@@ -95,6 +96,7 @@ static const APTR lib_vectors[] = {
     (APTR)L_PlatformInit, (APTR)L_PlatformShutdown, (APTR)L_BeginIndexedFrame, (APTR)L_PresentIndexed,
     (APTR)L_SetPalette, (APTR)L_DisplayIsPlanar, (APTR)L_GetInfo, (APTR)L_PresentHAM8, (APTR)L_Poll,
     (APTR)L_RawKeys, (APTR)L_Pointer, (APTR)L_ShowPointer, (APTR)L_TicksMS, (APTR)L_AudioS16Stereo,
+    (APTR)L_OpenAllegro,
     (APTR)-1,
 };
 static const struct { ULONG size; const APTR *vectors; APTR data; APTR init; } lib_inittable = {
@@ -365,4 +367,23 @@ static LONG L_AudioS16Stereo(REG(a0, const WORD *samples), REG(d0, ULONG frames)
     r = acgame_platform_audio_s16stereo(samples, frames, sample_rate);
     LEAVE();
     return r;
+}
+
+/* 1.2: "I need Allegro 4 (or 5)": the game's own Libs/ copy first, then
+ * LIBS:. Opened from the game's task (PROGDIR: is the game's), and the base
+ * is the game's to close. */
+static struct Library *L_OpenAllegro(REG(d0, LONG version))
+{
+    static const char progdir[] = "PROGDIR:Libs/";
+    const char *name = acgame_allegro_lib_name((int)version);
+    char path[48];
+    struct Library *lib;
+    int n = 0, i;
+    if (!name) return NULL;
+    for (i = 0; progdir[i]; i++) path[n++] = progdir[i];
+    for (i = 0; name[i] && n < (int)sizeof(path) - 1; i++) path[n++] = name[i];
+    path[n] = 0;
+    lib = OpenLibrary((CONST_STRPTR)path, 1);
+    if (!lib) lib = OpenLibrary((CONST_STRPTR)name, 1);
+    return lib;
 }

@@ -87,12 +87,22 @@ static void test_ham8_palette_reset(void) {
     assert(out[0].r == 17 && out[0].g == 34 && out[0].b == 51);
 }
 
+static void test_allegro_lib_name(void) {
+    assert(strcmp(acgame_allegro_lib_name(4), "allegro4.library") == 0);
+    assert(strcmp(acgame_allegro_lib_name(5), "allegro5.library") == 0);
+    assert(acgame_allegro_lib_name(0) == NULL);
+    assert(acgame_allegro_lib_name(3) == NULL);
+    assert(acgame_allegro_lib_name(6) == NULL);
+    assert(acgame_allegro_lib_name(-4) == NULL);
+}
+
 int main(void) {
     test_c2p_roundtrip();
     test_c2p_bit_order();
     test_c2p_fast_matches_ref();
     test_ham8_controls();
     test_ham8_palette_reset();
+    test_allegro_lib_name();
     puts("acgame reference tests: OK");
     return 0;
 }
