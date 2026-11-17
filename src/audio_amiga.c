@@ -412,7 +412,8 @@ int acgame_platform_audio_s16stereo(const int16_t *samples, unsigned frames,
 {
     acgame_audio *a = audio_get();
     if (!a) return -1;
-    return (int)acgame_mixer_push(&a->mix, samples, frames, sample_rate);
+    acgame_mixer_push(&a->mix, samples, frames, sample_rate);
+    return 0;   /* frames past a full queue are dropped, as a late sound card would */
 }
 
 int acgame_platform_audio_queued(void)

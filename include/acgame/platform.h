@@ -147,8 +147,9 @@ uint32_t acgame_platform_ticks_ms(void);
  * is no sound. It closes with the library, or with audio_close.
  *
  * audio_s16stereo queues interleaved signed 16-bit stereo frames at
- * sample_rate after those queued before; it gives how many it took (fewer
- * when the queue, ACGAME_AUDIO_STREAM_FRAMES, is full), -1 with no sound.
+ * sample_rate after those queued before: 0, or -1 with no sound. Frames
+ * past a full queue (ACGAME_AUDIO_STREAM_FRAMES) are dropped, so a game
+ * that makes sound ahead of time paces itself with audio_queued.
  * audio_queued: the frames still to play, -1 with no sound.
  * Voices (ACGAME_AUDIO_VOICES of them): voice_play starts a sample (voice -1:
  * a free one) and gives the voice, or -1; voice_set changes a playing
