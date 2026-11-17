@@ -22,7 +22,7 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - uses: DalsinAI/gfopenup/.github/actions/stove@team3/parts-on-merge-20261117
+      - uses: DalsinAI/gfopenup/.github/actions/stove@main
       - name: Build
         run: OUT="$PWD/build/amiga" sh build-amiga.sh
       - name: Host tests
