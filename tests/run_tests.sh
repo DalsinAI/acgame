@@ -8,6 +8,8 @@ cc -std=c11 -Wall -Wextra -Werror \
   "$ROOT/src/c2p_ref.c" \
   "$ROOT/src/ham8.c" \
   "$ROOT/src/acgame_allegro.c" \
+  "$ROOT/src/acgame_audio.c" \
+  "$ROOT/src/audio_amiga.c" \
   "$ROOT/src/platform_aros_aga.c" \
   "$ROOT/tests/test_acgame.c" \
   -o "$OUT"

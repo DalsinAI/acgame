@@ -1,4 +1,4 @@
-==id $Id: acgame_lib.sfd 1.2 (16.11.2026) $
+==id $Id: acgame_lib.sfd 1.3 (17.11.2026) $
 * "acgame.library" (ACGame), AmiCradle Team
 ==base _ACGameBase
 ==basetype struct Library *
@@ -28,4 +28,12 @@ ULONG ACG_TicksMS()()
 LONG ACG_AudioS16Stereo(const WORD *samples, ULONG frames, ULONG sampleRate)(a0,d0,d1)
 * 1.2
 struct Library *ACG_OpenAllegro(LONG version)(d0)
+* 1.3: sound (AHI, else Paula)
+LONG ACG_AudioOpen(ULONG rate, ULONG flags)(d0,d1)
+VOID ACG_AudioClose()()
+LONG ACG_AudioQueued()()
+LONG ACG_VoicePlay(LONG voice, const APTR data, ULONG frames, ULONG format, ULONG rate, LONG volume, LONG pan)(d0,a0,d1,d2,d3,d4,d5)
+LONG ACG_VoiceSet(LONG voice, LONG volume, LONG pan, ULONG rate)(d0,d1,d2,d3)
+VOID ACG_VoiceStop(LONG voice)(d0)
+LONG ACG_VoicePosition(LONG voice)(d0)
 ==end

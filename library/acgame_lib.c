@@ -1,7 +1,7 @@
 /* Copyright (c) 2026 AmiCradle Team. ACGame, MIT licence (see LICENSE at the repository root).
  * SPDX-License-Identifier: MIT
  *
- * acgame.library 1.2: ACGame's game layer (c2p, HAM8, the AGA and RTG
+ * acgame.library 1.3: ACGame's game layer (c2p, HAM8, the AGA and RTG
  * screens, keyboard, mouse and pads) as a shared library for AmigaOS 3.x.
  * The calls are acgame.h's and platform.h's, in library/acgame_lib.sfd's
  * order; the backend is src/platform_aros_aga.c, built with ACGAME_LIBRARY.
@@ -45,8 +45,8 @@ struct Device *TimerBase;
 int start(void) { return -1; }      /* run as a program: nothing (stays first in the file) */
 
 static const char lib_name[] = ACGAME_LIB_NAME;
-static const char lib_id[] = "acgame.library 1.2 (16.11.2026) ACGame, AmiCradle Team\r\n";
-static const char lib_ver[] __attribute__((used)) = "$VER: acgame.library 1.2 (16.11.2026)";   /* for Version on the file */
+static const char lib_id[] = "acgame.library 1.3 (17.11.2026) ACGame, AmiCradle Team\r\n";
+static const char lib_ver[] __attribute__((used)) = "$VER: acgame.library 1.3 (17.11.2026)";   /* for Version on the file */
 
 struct ACGBase {
     struct Library lib;
@@ -89,6 +89,15 @@ static ULONG L_TicksMS(void);
 static LONG L_AudioS16Stereo(REG(a0, const WORD *samples), REG(d0, ULONG frames), REG(d1, ULONG sample_rate),
                              REG(a6, struct ACGBase *base));
 static struct Library *L_OpenAllegro(REG(d0, LONG version));
+static LONG L_AudioOpen(REG(d0, ULONG rate), REG(d1, ULONG flags), REG(a6, struct ACGBase *base));
+static VOID L_AudioClose(REG(a6, struct ACGBase *base));
+static LONG L_AudioQueued(REG(a6, struct ACGBase *base));
+static LONG L_VoicePlay(REG(d0, LONG voice), REG(a0, const APTR data), REG(d1, ULONG frames), REG(d2, ULONG format),
+                        REG(d3, ULONG rate), REG(d4, LONG volume), REG(d5, LONG pan), REG(a6, struct ACGBase *base));
+static LONG L_VoiceSet(REG(d0, LONG voice), REG(d1, LONG volume), REG(d2, LONG pan), REG(d3, ULONG rate),
+                       REG(a6, struct ACGBase *base));
+static VOID L_VoiceStop(REG(d0, LONG voice), REG(a6, struct ACGBase *base));
+static LONG L_VoicePosition(REG(d0, LONG voice), REG(a6, struct ACGBase *base));
 
 static const APTR lib_vectors[] = {
     (APTR)lib_open, (APTR)lib_close, (APTR)lib_expunge, (APTR)lib_null,
@@ -97,6 +106,8 @@ static const APTR lib_vectors[] = {
     (APTR)L_SetPalette, (APTR)L_DisplayIsPlanar, (APTR)L_GetInfo, (APTR)L_PresentHAM8, (APTR)L_Poll,
     (APTR)L_RawKeys, (APTR)L_Pointer, (APTR)L_ShowPointer, (APTR)L_TicksMS, (APTR)L_AudioS16Stereo,
     (APTR)L_OpenAllegro,
+    (APTR)L_AudioOpen, (APTR)L_AudioClose, (APTR)L_AudioQueued, (APTR)L_VoicePlay, (APTR)L_VoiceSet,
+    (APTR)L_VoiceStop, (APTR)L_VoicePosition,
     (APTR)-1,
 };
 static const struct { ULONG size; const APTR *vectors; APTR data; APTR init; } lib_inittable = {
@@ -386,4 +397,60 @@ static struct Library *L_OpenAllegro(REG(d0, LONG version))
     lib = OpenLibrary((CONST_STRPTR)path, 1);
     if (!lib) lib = OpenLibrary((CONST_STRPTR)name, 1);
     return lib;
+}
+
+/* 1.3: sound (src/audio_amiga.c), each opener with an output of its own */
+static LONG L_AudioOpen(REG(d0, ULONG rate), REG(d1, ULONG flags), REG(a6, struct ACGBase *base))
+{
+    LONG r;
+    ENTER(base);
+    r = acgame_platform_audio_open(rate, flags);
+    LEAVE();
+    return r;
+}
+static VOID L_AudioClose(REG(a6, struct ACGBase *base))
+{
+    ENTER(base);
+    acgame_platform_audio_close();
+    LEAVE();
+}
+static LONG L_AudioQueued(REG(a6, struct ACGBase *base))
+{
+    LONG r;
+    ENTER(base);
+    r = acgame_platform_audio_queued();
+    LEAVE();
+    return r;
+}
+static LONG L_VoicePlay(REG(d0, LONG voice), REG(a0, const APTR data), REG(d1, ULONG frames), REG(d2, ULONG format),
+                        REG(d3, ULONG rate), REG(d4, LONG volume), REG(d5, LONG pan), REG(a6, struct ACGBase *base))
+{
+    LONG r;
+    ENTER(base);
+    r = acgame_platform_voice_play(voice, data, frames, format, rate, volume, pan);
+    LEAVE();
+    return r;
+}
+static LONG L_VoiceSet(REG(d0, LONG voice), REG(d1, LONG volume), REG(d2, LONG pan), REG(d3, ULONG rate),
+                       REG(a6, struct ACGBase *base))
+{
+    LONG r;
+    ENTER(base);
+    r = acgame_platform_voice_set(voice, volume, pan, rate);
+    LEAVE();
+    return r;
+}
+static VOID L_VoiceStop(REG(d0, LONG voice), REG(a6, struct ACGBase *base))
+{
+    ENTER(base);
+    acgame_platform_voice_stop(voice);
+    LEAVE();
+}
+static LONG L_VoicePosition(REG(d0, LONG voice), REG(a6, struct ACGBase *base))
+{
+    LONG r;
+    ENTER(base);
+    r = acgame_platform_voice_position(voice);
+    LEAVE();
+    return r;
 }

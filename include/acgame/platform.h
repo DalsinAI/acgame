@@ -140,8 +140,31 @@ int acgame_platform_pointer(int *x, int *y);
 #define ACGAME_HAS_SHOW_POINTER 1
 int acgame_platform_show_pointer(int show);
 uint32_t acgame_platform_ticks_ms(void);
+/* Sound (acgame.library 1.3, src/audio_amiga.c): AHI, else Paula. The
+ * output opens at the first sound call; acgame_platform_audio_open opens it
+ * with a rate (0: ENV:ACGame/AudioRate, else 22050) and ACGAME_AUDIO_ flags
+ * (include/acgame/audio.h) and gives the rate it plays at, or -1 when there
+ * is no sound. It closes with the library, or with audio_close.
+ *
+ * audio_s16stereo queues interleaved signed 16-bit stereo frames at
+ * sample_rate after those queued before; it gives how many it took (fewer
+ * when the queue, ACGAME_AUDIO_STREAM_FRAMES, is full), -1 with no sound.
+ * audio_queued: the frames still to play, -1 with no sound.
+ * Voices (ACGAME_AUDIO_VOICES of them): voice_play starts a sample (voice -1:
+ * a free one) and gives the voice, or -1; voice_set changes a playing
+ * voice (-1 or rate 0 keep a value); voice_position gives the frame playing,
+ * -1 once it has stopped. Volume 0-255, pan 0-255 (128 the centre). */
+#define ACGAME_HAS_AUDIO 1
+int acgame_platform_audio_open(unsigned rate, unsigned flags);
+void acgame_platform_audio_close(void);
 int acgame_platform_audio_s16stereo(const int16_t *samples, unsigned frames,
                                     unsigned sample_rate);
+int acgame_platform_audio_queued(void);
+int acgame_platform_voice_play(int voice, const void *data, unsigned frames, unsigned format,
+                               unsigned rate, int volume, int pan);
+int acgame_platform_voice_set(int voice, int volume, int pan, unsigned rate);
+void acgame_platform_voice_stop(int voice);
+int acgame_platform_voice_position(int voice);
 
 #ifdef __cplusplus
 }

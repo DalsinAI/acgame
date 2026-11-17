@@ -216,6 +216,7 @@ typedef struct {
 #if ACGAME_OPENINPUT
     acgame_openinput oi;
 #endif
+    void *audio;                    /* src/audio_amiga.c's output, once opened */
 } acgame_amiga_state;
 
 #ifdef ACGAME_LIBRARY
@@ -237,6 +238,7 @@ void acgame_state_cleanup(void) {
     if (g_acgame_amiga.screen || g_acgame_amiga.pixels) {
         acgame_platform_shutdown();
     }
+    acgame_platform_audio_close();  /* its task stops before the state goes */
 }
 #else
 static acgame_amiga_state g_acgame_amiga;
@@ -1446,13 +1448,16 @@ uint32_t acgame_platform_ticks_ms(void) {
 #endif
 }
 
-int acgame_platform_audio_s16stereo(const int16_t *samples, unsigned frames,
-                                    unsigned sample_rate) {
-    (void)samples;
-    (void)frames;
-    (void)sample_rate;
-    return -1;
+/* The sound calls are in src/audio_amiga.c; the opener's output is here. */
+void **acgame_audio_slot(void) {
+    return &g_acgame_amiga.audio;
 }
+#ifndef ACGAME_LIBRARY
+/* libacgame.a: the output closes as the game exits */
+__attribute__((destructor)) static void acgame_audio_at_exit(void) {
+    acgame_platform_audio_close();
+}
+#endif
 
 #else
 
@@ -1501,12 +1506,6 @@ int acgame_platform_show_pointer(int show) {
     return -1;
 }
 uint32_t acgame_platform_ticks_ms(void) { return 0; }
-int acgame_platform_audio_s16stereo(const int16_t *samples, unsigned frames,
-                                    unsigned sample_rate) {
-    (void)samples;
-    (void)frames;
-    (void)sample_rate;
-    return -1;
-}
+/* the sound calls: src/audio_amiga.c */
 
 #endif

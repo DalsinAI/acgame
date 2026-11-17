@@ -14,15 +14,21 @@
  * gets gfopenallegro's allegro4.library (allegro5.library), from its own
  * Libs/ drawer first, then LIBS:. The base is the game's: it closes it with
  * CloseLibrary() before it closes acgame.library.
+ *
+ * 1.3: sound, through AHI (Paula when AHI is not there): ACG_AudioS16Stereo
+ * plays at last, and ACG_AudioOpen, ACG_AudioClose, ACG_AudioQueued and
+ * four voice calls (ACG_VoicePlay, ACG_VoiceSet, ACG_VoiceStop,
+ * ACG_VoicePosition) for samples (acgame/audio.h).
  */
 #ifndef LIBRARIES_ACGAME_H
 #define LIBRARIES_ACGAME_H
 
 #define ACGAME_LIB_NAME     "acgame.library"
 #define ACGAME_LIB_VERSION  1
-#define ACGAME_LIB_REVISION 2
+#define ACGAME_LIB_REVISION 3
 
 #include "../acgame/acgame.h"
 #include "../acgame/platform.h"
+#include "../acgame/audio.h"
 
 #endif

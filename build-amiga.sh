@@ -35,13 +35,18 @@ LIBCFLAGS="-m68040 $SOFT -O2 -fomit-frame-pointer -fno-delete-null-pointer-check
 "$CC" $LIBCFLAGS -c -o "$OUT/obj/platform_lib.o" "$HERE/src/platform_aros_aga.c"
 # shellcheck disable=SC2086
 "$CC" $LIBCFLAGS -c -o "$OUT/obj/acgame_allegro.o" "$HERE/src/acgame_allegro.c"
+# shellcheck disable=SC2086
+"$CC" $LIBCFLAGS -c -o "$OUT/obj/acgame_audio.o" "$HERE/src/acgame_audio.c"
+# shellcheck disable=SC2086
+"$CC" $LIBCFLAGS -c -o "$OUT/obj/audio_lib.o" "$HERE/src/audio_amiga.c"
 # acgame_lib.c first: its start() and RomTag lead the hunk. It carries the
 # library's own memcpy, memset and memcmp; -fno-tree-loop-distribute-patterns
 # keeps GCC from turning their loops into calls to themselves.
 # shellcheck disable=SC2086
 "$CC" $LIBCFLAGS -fno-toplevel-reorder -fno-builtin -fno-tree-loop-distribute-patterns \
     -nostartfiles -nostdlib -o "$OUT/acgame.library" \
-    "$HERE/library/acgame_lib.c" "$OUT/obj/c2p_ref.o" "$OUT/obj/ham8.o" "$OUT/obj/platform_lib.o" "$OUT/obj/acgame_allegro.o" -lgcc
+    "$HERE/library/acgame_lib.c" "$OUT/obj/c2p_ref.o" "$OUT/obj/ham8.o" "$OUT/obj/platform_lib.o" "$OUT/obj/acgame_allegro.o" \
+    "$OUT/obj/acgame_audio.o" "$OUT/obj/audio_lib.o" -lgcc
 if "$NM" -u "$OUT/acgame.library" | grep .; then
     echo "acgame.library has undefined symbols" >&2; exit 1
 fi
@@ -68,7 +73,8 @@ echo "$OUT/libacgame.a ($(wc -c < "$OUT/libacgame.a") bytes)"
 # shellcheck disable=SC2086
 "$CC" -noixemul -m68040 $SOFT -O2 -fno-delete-null-pointer-checks $WARN -I"$HERE/include" \
     -o "$OUT/tests/ACGameStaticSmoke" "$HERE/examples/aga_smoke.c" \
-    "$HERE/src/c2p_ref.c" "$HERE/src/ham8.c" "$HERE/src/platform_aros_aga.c" "$HERE/src/acgame_allegro.c"
+    "$HERE/src/c2p_ref.c" "$HERE/src/ham8.c" "$HERE/src/platform_aros_aga.c" "$HERE/src/acgame_allegro.c" \
+    "$HERE/src/acgame_audio.c" "$HERE/src/audio_amiga.c"
 for f in ACGameLibSmoke ACGameLibTwice ACGameStaticSmoke; do
     echo "$OUT/tests/$f ($(wc -c < "$OUT/tests/$f") bytes)"
 done
