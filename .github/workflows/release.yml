@@ -1,0 +1,59 @@
+# Copyright (c) 2026 AmiCradle Team. MIT licence.
+# acgame.library's own release candidates and releases (gfopenup docs/design/PARTS-ON-MERGE.md section 3): a promotion, not
+# a rebuild. "Run workflow" with a version (1.0-rc2, 1.0) and, if not main's newest, a commit: the build part.yml
+# published for that commit in "parts" becomes the release v<version> (a pre-release while the version ends in
+# -rcN), holding the same acgame-<commit12>.tar.gz and its PART.json. GFOpenUp's parts.lock pins that release.
+# It stops when the commit has no build in "parts" (run "GFOpenUp part" on main first), or when the part's own
+# version isn't the release's.
+name: Release the part
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The release's version (1.0-rc2, 1.0)
+        required: true
+      commit:
+        description: The commit to release (default, main's newest)
+        required: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Promote the commit's build
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          V: ${{ inputs.version }}
+          C: ${{ inputs.commit }}
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$PWD"
+          echo "$V" | grep -Eq '^[0-9]+(\.[0-9]+)+(-rc[1-9][0-9]*)?$' || { echo "::error::$V isn't a version (1.0-rc2, 1.0)"; exit 1; }
+          c=$(git rev-parse --verify "${C:-HEAD}^{commit}"); s=${c:0:12}
+          mkdir rel
+          gh release download parts -p "acgame-$s.tar.gz" -D rel || {
+            echo "::error::no build of $s in the parts release: run the GFOpenUp part workflow on main first"; exit 1; }
+          tar -xzf "rel/acgame-$s.tar.gz" -C rel PART.json
+          python3 - "$c" "${V%-rc*}" <<'P'
+          import json, sys
+          p = json.load(open("rel/PART.json"))
+          if p["repo"] != "acgame" or p["commit"] != sys.argv[1]:
+              sys.exit(f"PART.json names {p['repo']} at {p['commit']}")
+          got = [x["version"] for x in p["parts"]]
+          if got != [sys.argv[2]]:
+              sys.exit(f"the build is version {got}, the release asks for {sys.argv[2]}")
+          P
+          pre=; case "$V" in *-rc*) pre=--prerelease ;; esac
+          gh release create "v$V" --target "$c" $pre --title "acgame.library $V" \
+            --notes "acgame.library $V: the GFOpenUp part built when $s merged, as it is. GFOpenUp takes it by a line in its parts.lock: acgame v$V.
+
+          Designed, tested and delivered by The AmiCradle Team." \
+            "rel/acgame-$s.tar.gz" rel/PART.json

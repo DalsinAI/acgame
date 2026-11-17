@@ -1,0 +1,66 @@
+# Copyright (c) 2026 AmiCradle Team. MIT licence.
+# acgame.library's GFOpenUp part, built on every merge (gfopenup docs/design/PARTS-ON-MERGE.md) with the os32-gcc16 stove
+# (gfopenup's stove action), never on daletop. A pull request builds only. A push to main publishes the part to the
+# rolling pre-release "parts" as acgame-<commit12>.tar.gz: build/part/Parts/ACGame (acgame.library, with its Part file,
+# as build-amiga.sh lays it out) and PART.json (this commit, the part's name and version, the compiler), with
+# latest.json beside it. The newest 30 builds are kept. release.yml makes one of these builds a release of its own.
+name: GFOpenUp part
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: part-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  part:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DalsinAI/gfopenup/.github/actions/stove@main
+      - name: Build
+        run: OUT="$PWD/build/amiga" sh build-amiga.sh
+      - name: Host tests
+        run: sh tests/run_tests.sh
+      - name: The part
+        id: part
+        shell: bash
+        run: |
+          set -euo pipefail
+          # the part's version is the library's own, so a part can't fall behind what it ships
+          v=$(grep -a -o '\$VER: acgame.library [0-9][0-9.]*' build/amiga/acgame.library | head -1 | awk '{print $3}')
+          [ -n "$v" ] || { echo "::error::acgame.library has no version string"; exit 1; }
+          rm -rf build/part && mkdir -p build/part out
+          cp -R build/amiga/Parts build/part/Parts
+          head -1 build/part/Parts/ACGame/Part | grep -qx "part ACGame $v"
+          c=$GITHUB_SHA; s=${c:0:12}
+          cc=$("$STOVE/prefix/bin/m68k-amigaos-gcc" --version | head -1)
+          cat > PART.json <<J
+          {"repo": "acgame", "commit": "$c", "built": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+           "files": ["build/part/Parts/ACGame"],
+           "parts": [{"name": "ACGame", "version": "$v", "main": "Libs/acgame.library"}],
+           "siblings": {}, "compiler": "$cc"}
+          J
+          python3 -c 'import json; json.load(open("PART.json"))'
+          tar -czf "out/acgame-$s.tar.gz" --owner=0 --group=0 PART.json build/part/Parts/ACGame
+          cp PART.json out/latest.json
+          cat out/latest.json; tar -tzf "out/acgame-$s.tar.gz"
+          echo "asset=out/acgame-$s.tar.gz" >> "$GITHUB_OUTPUT"
+      - name: Publish to the "parts" pre-release
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh release view parts >/dev/null 2>&1 || gh release create parts --prerelease --target main \
+            --title "GFOpenUp part builds" --notes "Each merge's GFOpenUp part, by commit (gfopenup docs/design/PARTS-ON-MERGE.md)."
+          gh release upload parts "${{ steps.part.outputs.asset }}" out/latest.json --clobber
+          gh release view parts --json assets --jq '[.assets[] | select(.name | startswith("acgame-"))] | sort_by(.createdAt) | reverse | .[30:] | .[].name' \
+            | while read -r n; do gh release delete-asset parts "$n" -y; done
