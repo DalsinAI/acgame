@@ -78,3 +78,12 @@ echo "$OUT/libacgame.a ($(wc -c < "$OUT/libacgame.a") bytes)"
 for f in ACGameLibSmoke ACGameLibTwice ACGameStaticSmoke; do
     echo "$OUT/tests/$f ($(wc -c < "$OUT/tests/$f") bytes)"
 done
+
+# the GFOpenUp part (GFOpenUpTool INSTALL Parts/ACGame): acgame.library in LIBS:
+PART="$OUT/Parts/ACGame"
+rm -rf "$PART"
+mkdir -p "$PART/Libs"
+cp "$OUT/acgame.library" "$PART/Libs/acgame.library"
+VER=$(sed -n 's/.*"\$VER: acgame.library \([0-9.]*\) .*/\1/p' "$HERE/library/acgame_lib.c")
+printf 'part ACGame %s\n; acgame.library: ACGame'"'"'s game layer (AGA/RTG screens, input, sound)\nneeds 68040\nadd "Libs/acgame.library" "LIBS:acgame.library"\n' "$VER" > "$PART/Part"
+cat "$PART/Part"
