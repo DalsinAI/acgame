@@ -50,5 +50,19 @@
     LP3(0x8a, LONG, ACG_AudioS16Stereo, const WORD *, samples, a0, ULONG, frames, d0, ULONG, sampleRate, d1, , ACGAME_BASE_NAME)
 #define ACG_OpenAllegro(version) \
     LP1(0x90, struct Library *, ACG_OpenAllegro, LONG, version, d0, , ACGAME_BASE_NAME)
+#define ACG_AudioOpen(rate, flags) \
+    LP2(0x96, LONG, ACG_AudioOpen, ULONG, rate, d0, ULONG, flags, d1, , ACGAME_BASE_NAME)
+#define ACG_AudioClose() \
+    LP0NR(0x9c, ACG_AudioClose, , ACGAME_BASE_NAME)
+#define ACG_AudioQueued() \
+    LP0(0xa2, LONG, ACG_AudioQueued, , ACGAME_BASE_NAME)
+#define ACG_VoicePlay(voice, data, frames, format, rate, volume, pan) \
+    LP7(0xa8, LONG, ACG_VoicePlay, LONG, voice, d0, const APTR, data, a0, ULONG, frames, d1, ULONG, format, d2, ULONG, rate, d3, LONG, volume, d4, LONG, pan, d5, , ACGAME_BASE_NAME)
+#define ACG_VoiceSet(voice, volume, pan, rate) \
+    LP4(0xae, LONG, ACG_VoiceSet, LONG, voice, d0, LONG, volume, d1, LONG, pan, d2, ULONG, rate, d3, , ACGAME_BASE_NAME)
+#define ACG_VoiceStop(voice) \
+    LP1NR(0xb4, ACG_VoiceStop, LONG, voice, d0, , ACGAME_BASE_NAME)
+#define ACG_VoicePosition(voice) \
+    LP1(0xba, LONG, ACG_VoicePosition, LONG, voice, d0, , ACGAME_BASE_NAME)
 
 #endif /* _INLINE_ACGAME_H */

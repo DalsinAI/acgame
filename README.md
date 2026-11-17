@@ -43,6 +43,13 @@ a game also runs on any later one.
   AGA or RTG 8-bit screens, the OpenGPU present on RTG, keyboard, mouse, and
   pads through GFOpenInput with lowlevel.library as the fallback. See
   `AROS_AGA.md`.
+- Sound (acgame.library 1.3, `include/acgame/audio.h`): a stream of 16-bit
+  stereo frames (`acgame_platform_audio_s16stereo`) and 16 sample voices
+  (8/16 bit, mono/stereo, signed/unsigned, looped), mixed in a task of its
+  own (`src/acgame_audio.c`) and played through AHI's default unit, or
+  through Paula (audio.device, one left and one right channel, 8 bits) when
+  AHI is not there (`src/audio_amiga.c`). `ENV:ACGame/Audio` = `ahi`, `paula`
+  or `off`; `ENV:ACGame/AudioRate` (default 22050; Paula at most 28000).
 
 Gameplay should normally use indexed 256-colour AGA. HAM8 is intended for
 title art, portraits, briefings, loading screens and other static or slowly
@@ -53,11 +60,10 @@ changing presentation where horizontal dependency is acceptable.
 - `Makefile.amigaos`: the static `libacgame.a` with the backend linked in, and
   the smoke programs (AmigaOS 3.x).
 - AROS m68k links the static build; acgame.library is AmigaOS 3.x only.
-- `tests/run_tests.sh`: the host tests of c2p and HAM8.
+- `tests/run_tests.sh`: the host tests of c2p, HAM8 and the sound mixer.
 
 ## Still to come
 
-- Paula-first audio with an optional AHI backend;
 - timer and file wrappers suitable for AmigaOS 3.x and AROS 68k;
 - fixed 320x200, 320x240 and 320x256 indexed AGA surfaces and HAM8 display setup.
 

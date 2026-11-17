@@ -149,5 +149,48 @@ uint32_t acgame_platform_ticks_ms(void)
 int acgame_platform_audio_s16stereo(const int16_t *samples, unsigned frames,
                                     unsigned sample_rate)
 {
-    return ACGameBase ? ACG_AudioS16Stereo(samples, frames, sample_rate) : -1;
+    return acg_open() ? ACG_AudioS16Stereo(samples, frames, sample_rate) : -1;
+}
+
+/* 1.3: sound. A library older than 1.3 has none of these: -1 (no sound). */
+static int acg_sound(void)
+{
+    return acg_open() && (ACGameBase->lib_Version > 1 || ACGameBase->lib_Revision >= 3);
+}
+#define ACG_HAS_SOUND() acg_sound()
+
+int acgame_platform_audio_open(unsigned rate, unsigned flags)
+{
+    return ACG_HAS_SOUND() ? ACG_AudioOpen(rate, flags) : -1;
+}
+
+void acgame_platform_audio_close(void)
+{
+    if (ACGameBase && ACG_HAS_SOUND()) ACG_AudioClose();
+}
+
+int acgame_platform_audio_queued(void)
+{
+    return ACGameBase && ACG_HAS_SOUND() ? ACG_AudioQueued() : -1;
+}
+
+int acgame_platform_voice_play(int voice, const void *data, unsigned frames, unsigned format,
+                               unsigned rate, int volume, int pan)
+{
+    return ACG_HAS_SOUND() ? ACG_VoicePlay(voice, (APTR)data, frames, format, rate, volume, pan) : -1;
+}
+
+int acgame_platform_voice_set(int voice, int volume, int pan, unsigned rate)
+{
+    return ACGameBase && ACG_HAS_SOUND() ? ACG_VoiceSet(voice, volume, pan, rate) : -1;
+}
+
+void acgame_platform_voice_stop(int voice)
+{
+    if (ACGameBase && ACG_HAS_SOUND()) ACG_VoiceStop(voice);
+}
+
+int acgame_platform_voice_position(int voice)
+{
+    return ACGameBase && ACG_HAS_SOUND() ? ACG_VoicePosition(voice) : -1;
 }

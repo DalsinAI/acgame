@@ -25,5 +25,12 @@ LONG ACG_ShowPointer(LONG show);
 ULONG ACG_TicksMS(VOID);
 LONG ACG_AudioS16Stereo(const WORD * samples, ULONG frames, ULONG sampleRate);
 struct Library * ACG_OpenAllegro(LONG version);
+LONG ACG_AudioOpen(ULONG rate, ULONG flags);
+VOID ACG_AudioClose(VOID);
+LONG ACG_AudioQueued(VOID);
+LONG ACG_VoicePlay(LONG voice, const APTR data, ULONG frames, ULONG format, ULONG rate, LONG volume, LONG pan);
+LONG ACG_VoiceSet(LONG voice, LONG volume, LONG pan, ULONG rate);
+VOID ACG_VoiceStop(LONG voice);
+LONG ACG_VoicePosition(LONG voice);
 
 #endif

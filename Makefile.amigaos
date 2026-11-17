@@ -11,7 +11,7 @@ CFLAGS  = -noixemul -std=gnu99 -O2 -Wall -Wextra -Werror -fno-delete-null-pointe
 LDFLAGS = -noixemul $(CPU)
 BUILD   = build/amigaos
 
-LIB_OBJS = $(BUILD)/c2p_ref.o $(BUILD)/ham8.o $(BUILD)/platform_aros_aga.o
+LIB_OBJS = $(BUILD)/c2p_ref.o $(BUILD)/ham8.o $(BUILD)/platform_aros_aga.o $(BUILD)/acgame_audio.o $(BUILD)/audio_amiga.o
 PROGRAMS = $(BUILD)/acgame-aga-smoke $(BUILD)/acgame-rtg-smoke $(BUILD)/acgame-smoke $(BUILD)/acgame-joy
 
 all: $(BUILD)/libacgame.a $(PROGRAMS)
