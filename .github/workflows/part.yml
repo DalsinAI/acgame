@@ -21,6 +21,8 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: gh (bigguy's runners don't have it)
+        run: command -v gh >/dev/null || { S=$([ "$(id -u)" = 0 ] || echo sudo); $S apt-get update -q && $S apt-get install -y -q gh; }
       - uses: actions/checkout@v4
       - uses: DalsinAI/gfopenup/.github/actions/stove@main
       - name: Build
