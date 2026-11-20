@@ -16,11 +16,13 @@ concurrency:
 jobs:
   part:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, lumavault]
     timeout-minutes: 30
     permissions:
       contents: write
     steps:
+      - name: gh (bigguy's runners don't have it)
+        run: command -v gh >/dev/null || { S=$([ "$(id -u)" = 0 ] || echo sudo); $S apt-get update -q && $S apt-get install -y -q gh; }
       - uses: actions/checkout@v4
       - uses: DalsinAI/gfopenup/.github/actions/stove@main
       - name: Build
